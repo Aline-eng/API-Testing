@@ -5,6 +5,7 @@ target/
 .kotlin
 allure-results/
 allure-report/
+.allure/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

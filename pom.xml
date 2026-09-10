@@ -91,6 +91,9 @@
                 <version>3.2.5</version>
                 <configuration>
                     <argLine>-javaagent:"${org.aspectj:aspectjweaver:jar}"</argLine>
+                    <systemPropertyVariables>
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
