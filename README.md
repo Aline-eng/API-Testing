@@ -20,12 +20,16 @@ reporting, Docker containerization, and a GitHub Actions CI/CD pipeline.
 ```
 src/test/java/org/automation/
   base/        shared test configuration (base URI, request spec)
-  models/      POJOs for request/response mapping
   tests/       test classes per resource (posts, comments, users)
-  utils/       test helpers
 src/test/resources/schemas/   JSON schema files used for response validation
-docs/                         test summary / reporting docs
+docs/                          test summary / reporting docs
+.github/workflows/             CI/CD pipeline
+Dockerfile
 ```
+
+Assertions are made directly against the response (REST Assured's `jsonPath()` +
+Hamcrest matchers) rather than through POJOs — Jackson is still used to serialize
+extracted response fragments for per-item JSON schema validation.
 
 ## Important constraint
 
@@ -59,3 +63,15 @@ docker run --rm api-testing-lab
 
 CI runs the full suite and publishes the Allure report as a build artifact on every
 push and pull request — see `.github/workflows/api-tests.yml`.
+
+**Note:** the Dockerfile and CI workflow use JDK 21 (`maven:3.9-eclipse-temurin-21`,
+`java-version: '21'`) to match `pom.xml`'s Java 21 target, rather than the JDK 17
+originally circulated for this lab — a JDK 17 toolchain can't compile Java 21
+bytecode.
+
+## Test results and findings
+
+12/12 tests pass locally, in Docker, and in CI. See
+[docs/test-summary.md](docs/test-summary.md) for the full coverage breakdown and
+documented API behavior findings (write-simulation, malformed-body status codes,
+etc.).
