@@ -9,8 +9,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - name: Run tests
-        run: mvn clean test
+      - name: Build Docker image
+        run: docker build -t api-testing-lab .
+      - name: Run tests in Docker
+        run: |
+          docker create --name test-run api-testing-lab
+          docker start -a test-run
+          STATUS=$?
+          docker cp test-run:/app/target ./target
+          docker rm test-run
+          exit $STATUS
       - name: Generate Allure report
         if: always()
         run: mvn allure:report
