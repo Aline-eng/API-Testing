@@ -1,27 +1,38 @@
 # Test Summary
 
 Automated REST Assured test suite against the [JSONPlaceholder](https://jsonplaceholder.typicode.com)
-API, covering full CRUD on `/posts`, relational reads on `/comments`, and nested-object
-reads on `/users`.
+API, covering full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on all three resources:
+`/posts`, `/comments`, and `/users`. Tests are organized one package per resource
+(`org.automation.tests.posts`, `.comments`, `.users`).
 
 ## Results
 
-12 / 12 tests passing (verified locally with `mvn clean test`, inside the Docker
+20 / 20 tests passing (verified locally with `mvn clean test`, inside the Docker
 container, and in GitHub Actions CI).
 
 | Test class | Tests | What it covers |
 |---|---|---|
-| `PostsGetTest` | 3 | `GET /posts` (200, 100 items, schema-valid, < 2s), `GET /posts/{id}` (200, id/userId match, schema valid), `GET /posts/99999` (404) |
-| `CommentsGetTest` | 1 | `GET /posts/{id}/comments` (200, non-empty, every `postId` matches, schema valid) |
-| `UsersGetTest` | 1 | `GET /users/{id}` (200, nested `address`/`company` present and correctly typed, schema valid) |
-| `PostsPostTest` | 1 | `POST /posts` (201, echoes submitted fields, generated id present) |
-| `PostsPutPatchTest` | 2 | `PUT /posts/{id}` (200, full replace), `PATCH /posts/{id}` (200, only targeted field changes) |
-| `PostsDeleteTest` | 1 | `DELETE /posts/{id}` (200, empty body) |
-| `PostsEdgeCasesTest` | 3 | Malformed/edge-case POST bodies (see findings below) |
+| `posts.PostsGetTest` | 3 | `GET /posts` (200, 100 items, schema-valid, < 2s), `GET /posts/{id}` (200, id/userId match, schema valid), `GET /posts/99999` (404) |
+| `posts.PostsPostTest` | 1 | `POST /posts` (201, echoes submitted fields, generated id present) |
+| `posts.PostsPutPatchTest` | 2 | `PUT /posts/{id}` (200, full replace), `PATCH /posts/{id}` (200, only targeted field changes) |
+| `posts.PostsDeleteTest` | 1 | `DELETE /posts/{id}` (200, empty body) |
+| `posts.PostsEdgeCasesTest` | 3 | Malformed/edge-case POST bodies (see findings below) |
+| `comments.CommentsGetTest` | 1 | `GET /posts/{id}/comments` (200, non-empty, every `postId` matches, schema valid) |
+| `comments.CommentsPostTest` | 1 | `POST /comments` (201, echoes submitted fields, generated id present) |
+| `comments.CommentsPutPatchTest` | 2 | `PUT /comments/{id}` (200, full replace), `PATCH /comments/{id}` (200, only targeted field changes) |
+| `comments.CommentsDeleteTest` | 1 | `DELETE /comments/{id}` (200, empty body) |
+| `users.UsersGetTest` | 1 | `GET /users/{id}` (200, nested `address`/`company` present and correctly typed, schema valid) |
+| `users.UsersPostTest` | 1 | `POST /users` (201, echoes submitted fields, generated id present) |
+| `users.UsersPutPatchTest` | 2 | `PUT /users/{id}` (200, full replace), `PATCH /users/{id}` (200, only targeted field changes, nested `address`/`company` unaffected) |
+| `users.UsersDeleteTest` | 1 | `DELETE /users/{id}` (200, empty body) |
 
 Every test asserts a status code, at least one header, and relevant body fields; GET
 tests additionally validate the response against a JSON schema
 (`src/test/resources/schemas/`).
+
+**Note:** the original lab spec labeled Comments and Users as "read-only" (`GET`
+only); CRUD was expanded to all three resources per a later scope decision, since
+JSONPlaceholder simulates writes identically across every resource.
 
 ## Known constraints and findings
 
@@ -58,7 +69,7 @@ bytecode. Both were changed to JDK 21 to match the pom.
 
 See the [README](../README.md) for local, Docker, and CI instructions.
 
-- `mvn clean test` — run all 12 tests
+- `mvn clean test` — run all 20 tests
 - `mvn allure:report && mvn allure:serve` — generate and view the Allure report
   (request/response attached per test via the `allure-rest-assured` filter)
 - `docker build -t api-testing-lab . && docker run --rm api-testing-lab` — run the

@@ -2,8 +2,9 @@
 
 Automated CRUD test suite for the [JSONPlaceholder](https://jsonplaceholder.typicode.com)
 REST API, built as a lab project for a QA Specialization training module (API Testing
-with REST Assured). Covers full CRUD coverage, JSON schema validation, Allure
-reporting, Docker containerization, and a GitHub Actions CI/CD pipeline.
+with REST Assured). Covers full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on
+`/posts`, `/comments`, and `/users`, JSON schema validation, Allure reporting, Docker
+containerization, and a GitHub Actions CI/CD pipeline.
 
 ## Tech stack
 
@@ -19,8 +20,10 @@ reporting, Docker containerization, and a GitHub Actions CI/CD pipeline.
 
 ```
 src/test/java/org/automation/
-  base/        shared test configuration (base URI, request spec)
-  tests/       test classes per resource (posts, comments, users)
+  base/              shared test configuration (base URI, request spec)
+  tests/posts/       full CRUD tests for /posts
+  tests/comments/    full CRUD tests for /comments
+  tests/users/       full CRUD tests for /users
 src/test/resources/schemas/   JSON schema files used for response validation
 docs/                          test summary / reporting docs
 .github/workflows/             CI/CD pipeline
@@ -71,7 +74,7 @@ bytecode.
 
 ## Test results and findings
 
-12/12 tests pass locally, in Docker, and in CI. See
+20/20 tests pass locally, in Docker, and in CI. See
 [docs/test-summary.md](docs/test-summary.md) for the full coverage breakdown and
 documented API behavior findings (write-simulation, malformed-body status codes,
 etc.).
