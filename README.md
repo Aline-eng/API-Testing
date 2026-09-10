@@ -72,9 +72,10 @@ push and pull request — see `.github/workflows/api-tests.yml`.
 originally circulated for this lab — a JDK 17 toolchain can't compile Java 21
 bytecode.
 
-## Test results and findings
+## Test plan and results
 
-20/20 tests pass locally, in Docker, and in CI. See
-[docs/test-summary.md](docs/test-summary.md) for the full coverage breakdown and
-documented API behavior findings (write-simulation, malformed-body status codes,
-etc.).
+- [docs/test-plan.md](docs/test-plan.md) — scope, approach, environment, and the
+  full test case matrix (planning-level document)
+- [docs/test-summary.md](docs/test-summary.md) — execution results (20/20 passing)
+  and documented API behavior findings (write-simulation, malformed-body status
+  codes, etc.)
