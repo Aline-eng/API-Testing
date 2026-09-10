@@ -1,4 +1,4 @@
-package org.automation.tests;
+package org.automation.tests.users;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;

@@ -1,4 +1,4 @@
-package org.automation.tests;
+package org.automation.tests.comments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.qameta.allure.Description;
