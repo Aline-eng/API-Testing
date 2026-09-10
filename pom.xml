@@ -13,7 +13,24 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <allure.version>2.27.0</allure.version>
+        <junit.version>5.10.2</junit.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- allure-junit5 transitively pulls junit-jupiter-api/junit-platform 5.9.2,
+                 which conflicts with junit-jupiter 5.10.2 below and breaks test discovery
+                 (NoClassDefFoundError: TempDirFactory). Pin the whole JUnit 5 BOM so every
+                 jupiter/platform artifact resolves to the same version. -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
