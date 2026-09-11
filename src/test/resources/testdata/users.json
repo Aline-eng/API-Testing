@@ -1,0 +1,10 @@
+{
+  "create": { "name": "Foo Bar", "username": "foobar", "email": "foo@bar.com" },
+  "update": { "id": 1, "name": "Updated Name", "username": "updatedname", "email": "updated@bar.com" },
+  "patchName": "Patched Name",
+  "filterUsername": "Bret",
+  "originalUsername": "Bret",
+  "originalEmail": "Sincere@april.biz",
+  "originalCity": "Gwenborough",
+  "originalCompanyName": "Romaguera-Crona"
+}

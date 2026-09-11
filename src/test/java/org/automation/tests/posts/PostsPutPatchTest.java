@@ -6,7 +6,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
-import org.automation.base.Endpoints;
 import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +29,7 @@ class PostsPutPatchTest extends BaseTest {
 
         given().spec(requestSpec)
                 .body(updatedPost)
-                .when().put(Endpoints.get("posts.byId"), POST_ID)
+                .when().put("/posts/{id}", POST_ID)
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
@@ -48,7 +47,7 @@ class PostsPutPatchTest extends BaseTest {
 
         given().spec(requestSpec)
                 .body(Map.of("title", newTitle))
-                .when().patch(Endpoints.get("posts.byId"), POST_ID)
+                .when().patch("/posts/{id}", POST_ID)
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))

@@ -6,7 +6,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
-import org.automation.base.Endpoints;
 import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +28,7 @@ class PostsPostTest extends BaseTest {
 
         given().spec(requestSpec)
                 .body(newPost)
-                .when().post(Endpoints.get("posts"))
+                .when().post("/posts")
                 .then().spec(responseSpec)
                 .statusCode(201)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))

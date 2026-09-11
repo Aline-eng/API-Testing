@@ -1,0 +1,5 @@
+{
+  "create": { "userId": 1, "title": "foo", "completed": false },
+  "update": { "id": 1, "userId": 1, "title": "updated title", "completed": true },
+  "originalTitle": "delectus aut autem"
+}

@@ -1,0 +1,5 @@
+{
+  "create": { "userId": 1, "title": "foo" },
+  "update": { "id": 1, "userId": 1, "title": "updated title" },
+  "patchTitle": "patched title"
+}

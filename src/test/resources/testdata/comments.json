@@ -1,0 +1,7 @@
+{
+  "create": { "postId": 1, "name": "foo", "email": "foo@bar.com", "body": "bar" },
+  "update": { "id": 1, "postId": 1, "name": "updated", "email": "updated@bar.com", "body": "updated body" },
+  "patchName": "patched name",
+  "originalEmail": "Eliseo@gardner.biz",
+  "originalBody": "laudantium enim quasi est quidem magnam voluptate ipsam eos\ntempora quo necessitatibus\ndolor quam autem quasi\nreiciendis et nam sapiente accusantium"
+}

@@ -5,7 +5,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
-import org.automation.base.Endpoints;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -23,7 +22,7 @@ class PostsDeleteTest extends BaseTest {
     @Description("DELETE /posts/{id} returns 200 with an empty JSON object body")
     void deletePost_returnsEmptyBody() {
         Map<String, Object> body = given().spec(requestSpec)
-                .when().delete(Endpoints.get("posts.byId"), 1)
+                .when().delete("/posts/{id}", 1)
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))

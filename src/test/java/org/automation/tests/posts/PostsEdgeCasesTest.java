@@ -7,7 +7,6 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.restassured.response.Response;
 import org.automation.base.BaseTest;
-import org.automation.base.Endpoints;
 import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,7 @@ class PostsEdgeCasesTest extends BaseTest {
 
         Response response = given().spec(requestSpec)
                 .body(malformedJson)
-                .when().post(Endpoints.get("posts"))
+                .when().post("/posts")
                 .then().extract().response();
 
         System.out.println("Raw response status: " + response.getStatusCode());
@@ -59,7 +58,7 @@ class PostsEdgeCasesTest extends BaseTest {
     void postWithEmptyBody_serverAcceptsWithNoValidation() {
         Response response = given().spec(requestSpec)
                 .body("{}")
-                .when().post(Endpoints.get("posts"))
+                .when().post("/posts")
                 .then().extract().response();
 
         System.out.println("Raw response status: " + response.getStatusCode());
@@ -77,7 +76,7 @@ class PostsEdgeCasesTest extends BaseTest {
 
         Response response = given().spec(requestSpec)
                 .body(malformedTypes)
-                .when().post(Endpoints.get("posts"))
+                .when().post("/posts")
                 .then().extract().response();
 
         System.out.println("Raw response status: " + response.getStatusCode());

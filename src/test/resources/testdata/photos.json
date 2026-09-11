@@ -1,0 +1,7 @@
+{
+  "create": { "albumId": 1, "title": "foo", "url": "https://via.placeholder.com/600/000000", "thumbnailUrl": "https://via.placeholder.com/150/000000" },
+  "update": { "id": 1, "albumId": 1, "title": "updated title", "url": "https://via.placeholder.com/600/111111", "thumbnailUrl": "https://via.placeholder.com/150/111111" },
+  "patchTitle": "patched title",
+  "originalUrl": "https://via.placeholder.com/600/92c952",
+  "originalThumbnailUrl": "https://via.placeholder.com/150/92c952"
+}
