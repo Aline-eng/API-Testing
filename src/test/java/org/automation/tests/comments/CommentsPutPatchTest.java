@@ -1,10 +1,12 @@
 package org.automation.tests.comments;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -17,18 +19,13 @@ import static org.hamcrest.Matchers.equalTo;
 class CommentsPutPatchTest extends BaseTest {
 
     private static final int COMMENT_ID = 1;
+    private static final JsonNode DATA = TestData.load("comments.json");
 
     @Test
     @Story("Full update of a comment")
     @Description("PUT /comments/{id} returns 200 with the full resource replaced by the submitted fields")
     void updateComment_replacesFullResource() {
-        Map<String, Object> updatedComment = Map.of(
-                "id", COMMENT_ID,
-                "postId", 1,
-                "name", "updated",
-                "email", "updated@bar.com",
-                "body", "updated body"
-        );
+        Map<String, Object> updatedComment = TestData.asMap(DATA.get("update"));
 
         given().spec(requestSpec)
                 .body(updatedComment)
@@ -47,7 +44,7 @@ class CommentsPutPatchTest extends BaseTest {
     @Story("Partial update of a comment")
     @Description("PATCH /comments/{id} returns 200, changes only the targeted field, leaves the rest unchanged")
     void patchComment_changesOnlyTargetedField() {
-        String newName = "patched name";
+        String newName = DATA.get("patchName").asText();
 
         given().spec(requestSpec)
                 .body(Map.of("name", newName))
@@ -58,9 +55,7 @@ class CommentsPutPatchTest extends BaseTest {
                 .body("id", equalTo(COMMENT_ID))
                 .body("postId", equalTo(1))
                 .body("name", equalTo(newName))
-                .body("email", equalTo("Eliseo@gardner.biz"))
-                .body("body", equalTo(
-                        "laudantium enim quasi est quidem magnam voluptate ipsam eos\ntempora quo necessitatibus\n"
-                                + "dolor quam autem quasi\nreiciendis et nam sapiente accusantium"));
+                .body("email", equalTo(DATA.get("originalEmail").asText()))
+                .body("body", equalTo(DATA.get("originalBody").asText()));
     }
 }

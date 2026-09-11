@@ -1,10 +1,12 @@
 package org.automation.tests.albums;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -16,14 +18,13 @@ import static org.hamcrest.Matchers.*;
 @Feature("Albums - POST")
 class AlbumsPostTest extends BaseTest {
 
+    private static final JsonNode DATA = TestData.load("albums.json");
+
     @Test
     @Story("Create an album")
     @Description("POST /albums returns 201, echoes the submitted fields, and assigns a generated id")
     void createAlbum_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newAlbum = Map.of(
-                "userId", 1,
-                "title", "foo"
-        );
+        Map<String, Object> newAlbum = TestData.asMap(DATA.get("create"));
 
         given().spec(requestSpec)
                 .body(newAlbum)
