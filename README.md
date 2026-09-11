@@ -1,64 +1,79 @@
 # API Testing Lab — REST Assured
 
-Automated CRUD test suite for the [JSONPlaceholder](https://jsonplaceholder.typicode.com)
-REST API, built as a lab project for a QA Specialization training module (API Testing
-with REST Assured). Covers full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on all six
-JSONPlaceholder resources — `/posts`, `/comments`, `/albums`, `/photos`, `/todos`,
-`/users` — including query-parameter filtering, JSON schema validation, Allure
-reporting, Docker containerization, and a GitHub Actions CI/CD pipeline.
+An automated test suite for the [JSONPlaceholder](https://jsonplaceholder.typicode.com)
+REST API, developed for the QA Specialization training module *API Testing with
+REST Assured*. The suite validates full CRUD behavior (`GET`, `POST`, `PUT`, `PATCH`,
+`DELETE`) across all six JSONPlaceholder resources — `/posts`, `/comments`,
+`/albums`, `/photos`, `/todos`, `/users` — with query-parameter filtering, JSON
+schema validation, Allure reporting, Docker containerization, and a GitHub Actions
+CI/CD pipeline.
 
-**Live Allure report:** https://aline-eng.github.io/API-Testing/ (republished by CI
-after every push to `main`)
+**Live Allure report:** https://aline-eng.github.io/API-Testing/
+Republished automatically by CI on every push to `main`.
 
-## Tech stack
+## Tech Stack
 
-- Java 21, Maven
-- REST Assured 5.x + JSON Schema Validator
-- JUnit 5 (Jupiter), Hamcrest
-- Jackson Databind (JSON test-data fixtures, schema-validation serialization)
-- Allure (JUnit5 + REST Assured integration) for reporting
-- Docker
-- GitHub Actions
+| Category | Technology |
+|---|---|
+| Language / Build | Java 21, Maven |
+| API testing | REST Assured 5.x, JSON Schema Validator |
+| Test framework | JUnit 5 (Jupiter), Hamcrest |
+| Data handling | Jackson Databind (JSON test-data fixtures, schema-validation serialization) |
+| Reporting | Allure (JUnit 5 + REST Assured integration) |
+| Containerization | Docker |
+| CI/CD | GitHub Actions |
 
-## Project structure
+## Project Structure
 
 ```
 src/test/java/org/automation/
-  base/              shared test configuration:
-                       BaseTest    - base URI + request/response spec
-                       TestData    - loads JSON fixtures from testdata/
-  tests/posts/       full CRUD tests for /posts
-  tests/comments/    full CRUD tests for /comments
-  tests/albums/      full CRUD tests for /albums
-  tests/photos/      full CRUD tests for /photos
-  tests/todos/       full CRUD tests for /todos
-  tests/users/       full CRUD tests for /users
+  base/
+    BaseTest.java      shared base URI and request/response specification
+    TestData.java      loads JSON fixtures from resources/testdata
+  tests/
+    posts/             CRUD tests for /posts
+    comments/          CRUD tests for /comments
+    albums/            CRUD tests for /albums
+    photos/            CRUD tests for /photos
+    todos/             CRUD tests for /todos
+    users/             CRUD tests for /users
+
 src/test/resources/
-  config.properties            base.uri - the one thing that varies by environment
-  schemas/                     JSON schema files used for response validation
-  testdata/                    one JSON fixture file per resource (request payloads)
-docs/                          test summary / reporting docs
-.github/workflows/             CI/CD pipeline
+  config.properties    base.uri - the target environment's base URL
+  schemas/             JSON Schema definitions used for response validation
+  testdata/            request-body fixtures, one JSON file per resource
+
+docs/                  test plan and test summary reports
+.github/workflows/     CI/CD pipeline definition
 Dockerfile
 ```
 
-Assertions are made directly against the response (REST Assured's `jsonPath()` +
-Hamcrest matchers) rather than through POJOs. Endpoint paths (e.g. `/posts/{id}`)
-stay inline in each test — they're part of what the test verifies, not
-configuration; only the base URI (`config.properties`) and request-body test data
-(`testdata/*.json`, via the `TestData` loader) are externalized. One exception:
-`PostsEdgeCasesTest`'s deliberately-malformed JSON string can't live in a `.json`
-data file since it isn't valid JSON, so it stays as a literal in the test.
+### Design Notes
 
-## Important constraint
+- Assertions are made directly against the response using REST Assured's
+  `jsonPath()` and Hamcrest matchers rather than through POJOs.
+- Endpoint paths (e.g. `/posts/{id}`) are defined inline in each test, since they
+  describe what the test verifies rather than environment configuration. Only the
+  base URI (`config.properties`) and request-body fixtures (`testdata/*.json`) are
+  externalized.
+- Request-body fixtures are the single source of truth for both the request sent
+  and the response asserted: test methods read expected field values back from the
+  same fixture object used to build the request body, avoiding duplicated literals.
+- One fixture cannot be externalized: `PostsEdgeCasesTest` includes a deliberately
+  malformed JSON string used to test the API's handling of invalid syntax. Since it
+  is not valid JSON, it cannot be stored in a `.json` fixture file and remains a
+  string literal in the test class.
 
-JSONPlaceholder **simulates** writes: `POST`/`PUT`/`PATCH`/`DELETE` return realistic
-success responses (e.g. `POST /posts` returns `201` with a new id like `101`), but
-nothing is actually persisted server-side. Tests only assert against the response of
-the call that produced it — no test chains a write to a follow-up read expecting the
-change to be visible.
+## API Behavior Note
 
-## Running the tests
+JSONPlaceholder simulates write operations rather than persisting them. `POST`,
+`PUT`, `PATCH`, and `DELETE` requests return realistic success responses (for
+example, `POST /posts` returns `201` with a newly generated id), but no data is
+actually stored server-side. Accordingly, no test chains a write operation to a
+subsequent read expecting the change to be reflected — each write test asserts only
+against the response it produced.
+
+## Running the Tests
 
 Locally, with Maven:
 
@@ -80,20 +95,20 @@ docker build -t api-testing-lab .
 docker run --rm api-testing-lab
 ```
 
-CI runs the full suite and publishes the Allure report as a build artifact on every
-push and pull request; on a successful push to `main`, it's also deployed to GitHub
-Pages at https://aline-eng.github.io/API-Testing/ — see
-`.github/workflows/api-tests.yml`.
+### CI/CD
 
-**Note:** the Dockerfile and CI workflow use JDK 21 (`maven:3.9-eclipse-temurin-21`,
-`java-version: '21'`) to match `pom.xml`'s Java 21 target, rather than the JDK 17
-originally circulated for this lab — a JDK 17 toolchain can't compile Java 21
-bytecode.
+On every push and pull request, the pipeline builds the Docker image, runs the full
+suite inside the container, and publishes the Allure report as a downloadable build
+artifact. On a successful push to `main`, the report is also deployed to GitHub
+Pages at https://aline-eng.github.io/API-Testing/. See
+`.github/workflows/api-tests.yml` for the full pipeline definition.
 
-## Test plan and results
+The Dockerfile and CI workflow both target JDK 21 (`maven:3.9-eclipse-temurin-21`,
+`java-version: '21'`), matching the Java 21 target defined in `pom.xml`.
 
-- [docs/test-plan.md](docs/test-plan.md) — scope, approach, environment, and the
-  full test case matrix (planning-level document)
-- [docs/test-summary.md](docs/test-summary.md) — execution results (51/51 passing)
-  and documented API behavior findings (write-simulation, malformed-body status
-  codes, etc.)
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [docs/test-plan.md](docs/test-plan.md) | Scope, approach, environment, and the full test case matrix |
+| [docs/test-summary.md](docs/test-summary.md) | Execution results and documented API behavior findings |

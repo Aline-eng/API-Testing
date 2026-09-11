@@ -1,65 +1,80 @@
 # API Test Plan — JSONPlaceholder REST API
 
+| | |
+|---|---|
+| **Project** | API Testing Lab — REST Assured |
+| **Author** | Aline Nzikwinkunda |
+| **Status** | Final |
+| **Related documents** | [README.md](../README.md), [test-summary.md](test-summary.md) |
+
 ## 1. Introduction
 
-This document defines the test strategy for automating API testing of the
-[JSONPlaceholder](https://jsonplaceholder.typicode.com) REST API using REST Assured,
-as part of a QA Specialization training lab. It covers CRUD operation testing,
-response validation, reporting, containerization, and CI/CD integration.
+This document defines the test strategy for the automated API test suite covering
+the [JSONPlaceholder](https://jsonplaceholder.typicode.com) REST API, developed as
+part of the QA Specialization training module *API Testing with REST Assured*. It
+describes the scope, approach, environment, and test cases used to validate CRUD
+operations, response correctness, and reporting.
 
 ## 2. Objective
 
 Validate the functional correctness of all six JSONPlaceholder resources
-(`/posts`, `/comments`, `/albums`, `/photos`, `/todos`, `/users`) by automating test
-cases for Create, Read, Update, and Delete operations, verifying status codes,
-response bodies, headers, and JSON schema compliance.
+(`/posts`, `/comments`, `/albums`, `/photos`, `/todos`, `/users`) through automated
+test cases covering Create, Read, Update, and Delete operations, verifying status
+codes, response bodies, headers, and JSON schema compliance.
 
 ## 3. Scope
 
-**In scope:**
-- Full CRUD (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on all 6 JSONPlaceholder
+### In Scope
+
+- Full CRUD (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on all six JSONPlaceholder
   resources: `/posts`, `/comments`, `/albums`, `/photos`, `/todos`, `/users`
-- Status code, header, and response body validation for every test
+- Status code, header, and response body validation on every test
 - JSON schema validation for `GET` responses
-- `GET` coverage beyond simple by-id lookups: list-all, single-by-id, non-existent-id
-  (404), and query-parameter filtering (e.g. `?userId=`, `?postId=`, `?albumId=`,
-  `?completed=`, `?username=`) on every resource that supports it
-- Negative/edge cases: non-existent resource (404), malformed and semantically
-  invalid POST payloads
-- Allure reporting, Docker containerization, GitHub Actions CI/CD, GitHub Pages
+- `GET` coverage beyond a single by-id lookup: list-all, single-by-id,
+  non-existent-id (`404`), and query-parameter filtering (e.g. `?userId=`,
+  `?postId=`, `?albumId=`, `?completed=`, `?username=`) for every resource that
+  supports it
+- Negative and edge-case handling: non-existent resources, malformed payloads, and
+  semantically invalid request bodies
+- Allure reporting, Docker containerization, GitHub Actions CI/CD, and GitHub Pages
   report publishing
 
-**Out of scope:**
-- Load/performance testing beyond a single response-time assertion on `GET /posts`
-- Authentication/authorization testing — the API requires none
+### Out of Scope
+
+- Load and performance testing, beyond a single response-time assertion on
+  `GET /posts`
+- Authentication and authorization testing — the API requires no authentication
 - UI testing — this is an API-only test suite
-- Security/penetration testing (injection, auth bypass, etc.) — JSONPlaceholder has
-  no real backend to meaningfully attack; see `docs/test-summary.md` for the
-  reasoning behind this exclusion
+- Security and penetration testing (e.g. injection, authentication bypass).
+  JSONPlaceholder is a public mock API with no persistent backend, so exploit-style
+  security testing does not meaningfully apply. See `docs/test-summary.md` for the
+  two API-behavior observations that were noted as part of this assessment.
 
 ## 4. Test Approach
 
-- **Framework:** REST Assured 5.x + JUnit 5 (Jupiter), Hamcrest matchers
+- **Framework:** REST Assured 5.x with JUnit 5 (Jupiter) and Hamcrest matchers.
 - **Structure:** one test package per resource (`org.automation.tests.posts`,
-  `.comments`, `.albums`, `.photos`, `.todos`, `.users`), grouping each resource's
-  full CRUD test classes together
-- **Positive cases:** one test class per HTTP verb group per resource, asserting
-  status code, at least one header, and relevant body fields
-- **GET depth:** beyond a single "get by id" test, GET coverage includes listing
-  the full collection (with a count assertion), a 404 for a non-existent id, and at
-  least one query-parameter filter test per resource (e.g. `GET /posts?userId=1`,
-  `GET /todos?completed=true`) — filtering was verified against the live API before
-  writing each test
-- **Schema validation:** every `GET` response validated against a JSON Schema
-  (`src/test/resources/schemas/`), authored from real API responses. For `/photos`
-  (5,000 items), only a 25-item sample is schema-validated per run to keep the test
-  fast, while the full count is still asserted
-- **Negative/edge cases:** invalid resource id (404), malformed JSON syntax, and
-  semantically invalid payloads (empty body, wrong field types) — asserting the
-  exact status code actually observed from the live API, not an assumed one
-- **Write-safety constraint:** JSONPlaceholder simulates writes without persisting
-  them, so no test chains a write to a follow-up read expecting the change to be
-  visible — each write test only asserts against the response it produced
+  `.comments`, `.albums`, `.photos`, `.todos`, `.users`), each containing that
+  resource's full CRUD test classes.
+- **Positive cases:** one test class per HTTP method group per resource, each
+  asserting status code, at least one response header, and relevant body fields.
+- **GET coverage:** each resource's `GET` tests cover the full collection (with a
+  count assertion), a single-resource lookup, a `404` for a non-existent id, and at
+  least one query-parameter filter, confirmed against live API responses.
+- **Schema validation:** every `GET` response is validated against a JSON Schema
+  defined in `src/test/resources/schemas/`, authored from observed API responses.
+  For `/photos` (5,000 records), a 25-item sample is schema-validated per run to
+  keep execution time reasonable, while the full record count is still asserted.
+- **Negative and edge cases:** invalid resource ids (`404`), malformed JSON syntax,
+  and semantically invalid payloads (empty body, incorrect field types) are
+  asserted against the status code actually returned by the API.
+- **Write-safety constraint:** JSONPlaceholder simulates write operations without
+  persisting them. No test chains a write to a subsequent read expecting the change
+  to be reflected; each write test asserts only against the response it produced.
+- **Test data management:** request-body fixtures are defined in
+  `src/test/resources/testdata/` (one JSON file per resource) and loaded via a
+  shared `TestData` utility, serving as the single source of truth for both the
+  request sent and the response fields asserted.
 
 ## 5. Test Environment
 
@@ -67,7 +82,7 @@ response bodies, headers, and JSON schema compliance.
 |---|---|
 | Language / Build | Java 21, Maven 3.9 |
 | Test framework | JUnit 5.10.2 (Jupiter) |
-| API client | REST Assured 5.4.0 + json-schema-validator |
+| API client | REST Assured 5.4.0, json-schema-validator |
 | Assertions | Hamcrest |
 | Serialization | Jackson Databind 2.17.0 |
 | Reporting | Allure 2.27.0 (allure-junit5, allure-rest-assured) |
@@ -77,18 +92,18 @@ response bodies, headers, and JSON schema compliance.
 
 ## 6. Entry Criteria
 
-- `pom.xml` configured with all required dependencies and plugins
-- Shared base test configuration (`BaseTest`) providing base URI and request/response
-  specs
-- Target API reachable and its response shapes captured for schema authoring
+- `pom.xml` configured with all required dependencies and plugins.
+- Shared base test configuration (`BaseTest`) providing the base URI and
+  request/response specifications.
+- Target API reachable, with response shapes captured for schema authoring.
 
 ## 7. Exit Criteria
 
-- All planned test cases (see §9) implemented and passing
-- Allure report generated with request/response detail for every test
-- Docker image builds and runs the full suite successfully
+- All planned test cases (Section 9) implemented and passing.
+- Allure report generated with request/response detail for every test.
+- Docker image builds and executes the full suite successfully.
 - CI/CD pipeline runs the suite inside Docker and publishes the Allure report on
-  every push/PR
+  every push and pull request.
 
 ## 8. Test Deliverables
 
@@ -97,14 +112,14 @@ response bodies, headers, and JSON schema compliance.
 - JSON schemas (`src/test/resources/schemas/`)
 - `Dockerfile`
 - CI/CD workflow (`.github/workflows/api-tests.yml`)
-- Allure report (generated locally or downloaded as a CI build artifact)
-- Test summary / results and findings report (`docs/test-summary.md`)
+- Allure report (published to GitHub Pages and available as a CI build artifact)
+- Test summary and findings report (`docs/test-summary.md`)
 
 ## 9. Test Case Summary
 
-51 test cases across all 6 resources.
+51 test cases across six resources.
 
-**Posts** (11)
+**Posts (11)**
 
 | TC ID | Method | Endpoint | Scenario | Expected Result | Type |
 |---|---|---|---|---|---|
@@ -116,16 +131,16 @@ response bodies, headers, and JSON schema compliance.
 | TC-06 | PUT | `/posts/{id}` | Full update of a post | 200, full resource replaced | Positive |
 | TC-07 | PATCH | `/posts/{id}` | Partial update of a post | 200, only the targeted field changes | Positive |
 | TC-08 | DELETE | `/posts/{id}` | Delete a post | 200, empty response body | Positive |
-| TC-09 | POST | `/posts` | Malformed JSON syntax | 500 — documented API deviation from REST convention | Negative |
-| TC-10 | POST | `/posts` | Empty JSON object body | 201 — API performs no server-side validation | Negative/Edge |
-| TC-11 | POST | `/posts` | Wrong field types (`userId` as string) | 201 — API performs no server-side validation | Negative/Edge |
+| TC-09 | POST | `/posts` | Malformed JSON syntax | 500 (see Section 11, R-2) | Negative |
+| TC-10 | POST | `/posts` | Empty JSON object body | 201 (no server-side validation) | Negative/Edge |
+| TC-11 | POST | `/posts` | Wrong field types (`userId` as string) | 201 (no server-side validation) | Negative/Edge |
 
-**Comments** (8)
+**Comments (8)**
 
 | TC ID | Method | Endpoint | Scenario | Expected Result | Type |
 |---|---|---|---|---|---|
 | TC-12 | GET | `/posts/{id}/comments` | Retrieve comments for a post (nested route) | 200, non-empty, every `postId` matches, schema-valid | Positive |
-| TC-13 | GET | `/comments?postId={id}` | Filter comments by postId (query param) | 200, same 5 comments as the nested route | Positive |
+| TC-13 | GET | `/comments?postId={id}` | Filter comments by postId (query parameter) | 200, same 5 comments as the nested route | Positive |
 | TC-14 | GET | `/comments/{id}` | Retrieve a single comment | 200, `id` matches, schema-valid | Positive |
 | TC-15 | GET | `/comments/99999` | Retrieve a non-existent comment | 404 | Negative |
 | TC-16 | POST | `/comments` | Create a comment | 201, echoes submitted fields, generated `id` present | Positive |
@@ -133,7 +148,7 @@ response bodies, headers, and JSON schema compliance.
 | TC-18 | PATCH | `/comments/{id}` | Partial update of a comment | 200, only the targeted field changes | Positive |
 | TC-19 | DELETE | `/comments/{id}` | Delete a comment | 200, empty response body | Positive |
 
-**Albums** (8)
+**Albums (8)**
 
 | TC ID | Method | Endpoint | Scenario | Expected Result | Type |
 |---|---|---|---|---|---|
@@ -146,7 +161,7 @@ response bodies, headers, and JSON schema compliance.
 | TC-26 | PATCH | `/albums/{id}` | Partial update of an album | 200, only the targeted field changes | Positive |
 | TC-27 | DELETE | `/albums/{id}` | Delete an album | 200, empty response body | Positive |
 
-**Photos** (8)
+**Photos (8)**
 
 | TC ID | Method | Endpoint | Scenario | Expected Result | Type |
 |---|---|---|---|---|---|
@@ -159,7 +174,7 @@ response bodies, headers, and JSON schema compliance.
 | TC-34 | PATCH | `/photos/{id}` | Partial update of a photo | 200, only the targeted field changes | Positive |
 | TC-35 | DELETE | `/photos/{id}` | Delete a photo | 200, empty response body | Positive |
 
-**Todos** (9)
+**Todos (9)**
 
 | TC ID | Method | Endpoint | Scenario | Expected Result | Type |
 |---|---|---|---|---|---|
@@ -173,7 +188,7 @@ response bodies, headers, and JSON schema compliance.
 | TC-43 | PATCH | `/todos/{id}` | Partial update of a todo | 200, only the targeted field changes | Positive |
 | TC-44 | DELETE | `/todos/{id}` | Delete a todo | 200, empty response body | Positive |
 
-**Users** (7)
+**Users (7)**
 
 | TC ID | Method | Endpoint | Scenario | Expected Result | Type |
 |---|---|---|---|---|---|
@@ -187,26 +202,21 @@ response bodies, headers, and JSON schema compliance.
 
 ## 10. Roles and Responsibilities
 
-Single QA engineer role (Aline Nzikwinkunda): test planning, automation
-implementation, execution, and reporting.
+| Role | Responsibility | Assigned to |
+|---|---|---|
+| QA Engineer | Test planning, automation development, execution, and reporting | Aline Nzikwinkunda |
 
 ## 11. Risks and Assumptions
 
-- **JSONPlaceholder simulates writes** — `POST`/`PUT`/`PATCH`/`DELETE` return
-  realistic success responses but nothing persists server-side. Mitigated by never
-  chaining a write to a follow-up read.
-- **No server-side payload validation** — malformed or semantically invalid POST
-  bodies do not reliably produce `4xx` responses (observed: `500` for syntax errors,
-  `201` for structurally valid-but-empty/wrong-typed bodies). Documented as a known
-  API deviation rather than worked around.
-- **Public, unauthenticated API** — subject to network flakiness and rate limiting
-  outside this project's control; no rate limiting was encountered during test runs.
-- **Java version mismatch in originally-circulated Docker/CI templates** (JDK 17)
-  versus the project's Java 21 target — resolved by standardizing on JDK 21 across
-  the Dockerfile and CI workflow.
+| ID | Risk / Assumption | Impact | Mitigation |
+|---|---|---|---|
+| R-1 | JSONPlaceholder simulates writes; no data persists server-side | Tests that assume persistence would fail or produce false results | No test chains a write to a subsequent read; each write test asserts only against its own response |
+| R-2 | The API returns `500` for malformed JSON syntax and `201` for semantically invalid payloads, rather than `400`, since it performs no server-side payload validation | Tests written against an assumed `4xx` response would fail | Tests assert the exact status code observed from the live API; behavior documented in `docs/test-summary.md` |
+| R-3 | The API is public and unauthenticated, and may be subject to network flakiness or rate limiting outside this project's control | Intermittent test failures unrelated to code defects | No rate limiting was observed during test development or execution |
+| R-4 | JDK version mismatch between the initially provided Docker/CI templates (JDK 17) and the project's Java 21 target | Docker build and CI pipeline would fail, since JDK 17 cannot compile Java 21 bytecode | Standardized on JDK 21 across the Dockerfile and CI workflow |
 
 ## 12. Test Execution
 
-See the [README](../README.md) for exact commands to run the suite locally, in
-Docker, and via CI. Results and findings from the most recent execution are recorded
-in [`docs/test-summary.md`](test-summary.md).
+See the [README](../README.md) for commands to run the suite locally, in Docker,
+and via CI. Execution results and findings from the most recent run are recorded in
+[`docs/test-summary.md`](test-summary.md).
