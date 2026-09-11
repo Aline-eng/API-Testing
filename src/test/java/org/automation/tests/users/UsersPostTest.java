@@ -24,7 +24,8 @@ class UsersPostTest extends BaseTest {
     @Story("Create a user")
     @Description("POST /users returns 201, echoes the submitted fields, and assigns a generated id")
     void createUser_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newUser = TestData.asMap(DATA.get("create"));
+        JsonNode create = DATA.get("create");
+        Map<String, Object> newUser = TestData.asMap(create);
 
         given().spec(requestSpec)
                 .body(newUser)
@@ -32,9 +33,9 @@ class UsersPostTest extends BaseTest {
                 .then().spec(responseSpec)
                 .statusCode(201)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
-                .body("name", equalTo("Foo Bar"))
-                .body("username", equalTo("foobar"))
-                .body("email", equalTo("foo@bar.com"))
+                .body("name", equalTo(create.get("name").asText()))
+                .body("username", equalTo(create.get("username").asText()))
+                .body("email", equalTo(create.get("email").asText()))
                 .body("id", notNullValue())
                 .body("id", greaterThan(0));
     }

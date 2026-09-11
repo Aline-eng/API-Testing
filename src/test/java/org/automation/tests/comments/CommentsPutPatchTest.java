@@ -25,7 +25,8 @@ class CommentsPutPatchTest extends BaseTest {
     @Story("Full update of a comment")
     @Description("PUT /comments/{id} returns 200 with the full resource replaced by the submitted fields")
     void updateComment_replacesFullResource() {
-        Map<String, Object> updatedComment = TestData.asMap(DATA.get("update"));
+        JsonNode update = DATA.get("update");
+        Map<String, Object> updatedComment = TestData.asMap(update);
 
         given().spec(requestSpec)
                 .body(updatedComment)
@@ -34,10 +35,10 @@ class CommentsPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(COMMENT_ID))
-                .body("postId", equalTo(1))
-                .body("name", equalTo("updated"))
-                .body("email", equalTo("updated@bar.com"))
-                .body("body", equalTo("updated body"));
+                .body("postId", equalTo(update.get("postId").asInt()))
+                .body("name", equalTo(update.get("name").asText()))
+                .body("email", equalTo(update.get("email").asText()))
+                .body("body", equalTo(update.get("body").asText()));
     }
 
     @Test
@@ -53,7 +54,7 @@ class CommentsPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(COMMENT_ID))
-                .body("postId", equalTo(1))
+                .body("postId", equalTo(DATA.get("update").get("postId").asInt()))
                 .body("name", equalTo(newName))
                 .body("email", equalTo(DATA.get("originalEmail").asText()))
                 .body("body", equalTo(DATA.get("originalBody").asText()));

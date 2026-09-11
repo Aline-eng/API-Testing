@@ -25,7 +25,8 @@ class AlbumsPutPatchTest extends BaseTest {
     @Story("Full update of an album")
     @Description("PUT /albums/{id} returns 200 with the full resource replaced by the submitted fields")
     void updateAlbum_replacesFullResource() {
-        Map<String, Object> updatedAlbum = TestData.asMap(DATA.get("update"));
+        JsonNode update = DATA.get("update");
+        Map<String, Object> updatedAlbum = TestData.asMap(update);
 
         given().spec(requestSpec)
                 .body(updatedAlbum)
@@ -34,8 +35,8 @@ class AlbumsPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(ALBUM_ID))
-                .body("userId", equalTo(1))
-                .body("title", equalTo("updated title"));
+                .body("userId", equalTo(update.get("userId").asInt()))
+                .body("title", equalTo(update.get("title").asText()));
     }
 
     @Test
@@ -51,7 +52,7 @@ class AlbumsPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(ALBUM_ID))
-                .body("userId", equalTo(1))
+                .body("userId", equalTo(DATA.get("update").get("userId").asInt()))
                 .body("title", equalTo(newTitle));
     }
 }

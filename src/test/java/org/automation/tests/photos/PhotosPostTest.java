@@ -24,7 +24,8 @@ class PhotosPostTest extends BaseTest {
     @Story("Create a photo")
     @Description("POST /photos returns 201, echoes the submitted fields, and assigns a generated id")
     void createPhoto_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newPhoto = TestData.asMap(DATA.get("create"));
+        JsonNode create = DATA.get("create");
+        Map<String, Object> newPhoto = TestData.asMap(create);
 
         given().spec(requestSpec)
                 .body(newPhoto)
@@ -32,10 +33,10 @@ class PhotosPostTest extends BaseTest {
                 .then().spec(responseSpec)
                 .statusCode(201)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
-                .body("albumId", equalTo(1))
-                .body("title", equalTo("foo"))
-                .body("url", equalTo("https://via.placeholder.com/600/000000"))
-                .body("thumbnailUrl", equalTo("https://via.placeholder.com/150/000000"))
+                .body("albumId", equalTo(create.get("albumId").asInt()))
+                .body("title", equalTo(create.get("title").asText()))
+                .body("url", equalTo(create.get("url").asText()))
+                .body("thumbnailUrl", equalTo(create.get("thumbnailUrl").asText()))
                 .body("id", notNullValue())
                 .body("id", greaterThan(0));
     }

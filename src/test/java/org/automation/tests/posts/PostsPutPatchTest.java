@@ -25,7 +25,8 @@ class PostsPutPatchTest extends BaseTest {
     @Story("Full update of a post")
     @Description("PUT /posts/{id} returns 200 with the full resource replaced by the submitted fields")
     void updatePost_replacesFullResource() {
-        Map<String, Object> updatedPost = TestData.asMap(DATA.get("update"));
+        JsonNode update = DATA.get("update");
+        Map<String, Object> updatedPost = TestData.asMap(update);
 
         given().spec(requestSpec)
                 .body(updatedPost)
@@ -34,9 +35,9 @@ class PostsPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(POST_ID))
-                .body("title", equalTo("updated title"))
-                .body("body", equalTo("updated body"))
-                .body("userId", equalTo(1));
+                .body("title", equalTo(update.get("title").asText()))
+                .body("body", equalTo(update.get("body").asText()))
+                .body("userId", equalTo(update.get("userId").asInt()));
     }
 
     @Test
@@ -52,7 +53,7 @@ class PostsPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(POST_ID))
-                .body("userId", equalTo(1))
+                .body("userId", equalTo(DATA.get("update").get("userId").asInt()))
                 .body("title", equalTo(newTitle))
                 .body("body", equalTo(DATA.get("originalBody").asText()));
     }

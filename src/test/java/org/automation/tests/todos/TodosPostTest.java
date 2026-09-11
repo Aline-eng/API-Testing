@@ -24,7 +24,8 @@ class TodosPostTest extends BaseTest {
     @Story("Create a todo")
     @Description("POST /todos returns 201, echoes the submitted fields, and assigns a generated id")
     void createTodo_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newTodo = TestData.asMap(DATA.get("create"));
+        JsonNode create = DATA.get("create");
+        Map<String, Object> newTodo = TestData.asMap(create);
 
         given().spec(requestSpec)
                 .body(newTodo)
@@ -32,9 +33,9 @@ class TodosPostTest extends BaseTest {
                 .then().spec(responseSpec)
                 .statusCode(201)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
-                .body("userId", equalTo(1))
-                .body("title", equalTo("foo"))
-                .body("completed", equalTo(false))
+                .body("userId", equalTo(create.get("userId").asInt()))
+                .body("title", equalTo(create.get("title").asText()))
+                .body("completed", equalTo(create.get("completed").asBoolean()))
                 .body("id", notNullValue())
                 .body("id", greaterThan(0));
     }

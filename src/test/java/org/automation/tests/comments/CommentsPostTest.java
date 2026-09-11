@@ -24,7 +24,8 @@ class CommentsPostTest extends BaseTest {
     @Story("Create a comment")
     @Description("POST /comments returns 201, echoes the submitted fields, and assigns a generated id")
     void createComment_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newComment = TestData.asMap(DATA.get("create"));
+        JsonNode create = DATA.get("create");
+        Map<String, Object> newComment = TestData.asMap(create);
 
         given().spec(requestSpec)
                 .body(newComment)
@@ -32,10 +33,10 @@ class CommentsPostTest extends BaseTest {
                 .then().spec(responseSpec)
                 .statusCode(201)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
-                .body("postId", equalTo(1))
-                .body("name", equalTo("foo"))
-                .body("email", equalTo("foo@bar.com"))
-                .body("body", equalTo("bar"))
+                .body("postId", equalTo(create.get("postId").asInt()))
+                .body("name", equalTo(create.get("name").asText()))
+                .body("email", equalTo(create.get("email").asText()))
+                .body("body", equalTo(create.get("body").asText()))
                 .body("id", notNullValue())
                 .body("id", greaterThan(0));
     }

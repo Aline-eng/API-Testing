@@ -25,7 +25,8 @@ class TodosPutPatchTest extends BaseTest {
     @Story("Full update of a todo")
     @Description("PUT /todos/{id} returns 200 with the full resource replaced by the submitted fields")
     void updateTodo_replacesFullResource() {
-        Map<String, Object> updatedTodo = TestData.asMap(DATA.get("update"));
+        JsonNode update = DATA.get("update");
+        Map<String, Object> updatedTodo = TestData.asMap(update);
 
         given().spec(requestSpec)
                 .body(updatedTodo)
@@ -34,24 +35,26 @@ class TodosPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(TODO_ID))
-                .body("userId", equalTo(1))
-                .body("title", equalTo("updated title"))
-                .body("completed", equalTo(true));
+                .body("userId", equalTo(update.get("userId").asInt()))
+                .body("title", equalTo(update.get("title").asText()))
+                .body("completed", equalTo(update.get("completed").asBoolean()));
     }
 
     @Test
     @Story("Partial update of a todo")
     @Description("PATCH /todos/{id} returns 200, changes only the targeted field, leaves the rest unchanged")
     void patchTodo_changesOnlyTargetedField() {
+        boolean newCompleted = true;
+
         given().spec(requestSpec)
-                .body(Map.of("completed", true))
+                .body(Map.of("completed", newCompleted))
                 .when().patch("/todos/{id}", TODO_ID)
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(TODO_ID))
-                .body("userId", equalTo(1))
+                .body("userId", equalTo(DATA.get("update").get("userId").asInt()))
                 .body("title", equalTo(DATA.get("originalTitle").asText()))
-                .body("completed", equalTo(true));
+                .body("completed", equalTo(newCompleted));
     }
 }

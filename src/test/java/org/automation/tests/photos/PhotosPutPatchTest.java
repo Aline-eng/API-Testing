@@ -25,7 +25,8 @@ class PhotosPutPatchTest extends BaseTest {
     @Story("Full update of a photo")
     @Description("PUT /photos/{id} returns 200 with the full resource replaced by the submitted fields")
     void updatePhoto_replacesFullResource() {
-        Map<String, Object> updatedPhoto = TestData.asMap(DATA.get("update"));
+        JsonNode update = DATA.get("update");
+        Map<String, Object> updatedPhoto = TestData.asMap(update);
 
         given().spec(requestSpec)
                 .body(updatedPhoto)
@@ -34,10 +35,10 @@ class PhotosPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(PHOTO_ID))
-                .body("albumId", equalTo(1))
-                .body("title", equalTo("updated title"))
-                .body("url", equalTo("https://via.placeholder.com/600/111111"))
-                .body("thumbnailUrl", equalTo("https://via.placeholder.com/150/111111"));
+                .body("albumId", equalTo(update.get("albumId").asInt()))
+                .body("title", equalTo(update.get("title").asText()))
+                .body("url", equalTo(update.get("url").asText()))
+                .body("thumbnailUrl", equalTo(update.get("thumbnailUrl").asText()));
     }
 
     @Test
@@ -53,7 +54,7 @@ class PhotosPutPatchTest extends BaseTest {
                 .statusCode(200)
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(PHOTO_ID))
-                .body("albumId", equalTo(1))
+                .body("albumId", equalTo(DATA.get("update").get("albumId").asInt()))
                 .body("title", equalTo(newTitle))
                 .body("url", equalTo(DATA.get("originalUrl").asText()))
                 .body("thumbnailUrl", equalTo(DATA.get("originalThumbnailUrl").asText()));
