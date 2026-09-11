@@ -72,4 +72,20 @@ class PostsGetTest extends BaseTest {
                 .statusCode(404)
                 .header("Content-Type", containsString("application/json"));
     }
+
+    @Test
+    @Story("Filter posts by userId")
+    @Description("GET /posts?userId={id} returns 200 with only that user's posts")
+    void getPostsFilteredByUserId_returnsOnlyMatchingPosts() {
+        int userId = 1;
+
+        given().spec(requestSpec)
+                .queryParam("userId", userId)
+                .when().get("/posts")
+                .then().spec(responseSpec)
+                .statusCode(200)
+                .header("Content-Type", containsString("application/json"))
+                .body("size()", equalTo(10))
+                .body("userId", everyItem(equalTo(userId)));
+    }
 }

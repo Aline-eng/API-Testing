@@ -12,7 +12,7 @@ import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInC
 import static org.hamcrest.Matchers.*;
 
 @Epic("JSONPlaceholder API")
-@Feature("Users - GET (read-only)")
+@Feature("Users - GET")
 class UsersGetTest extends BaseTest {
 
     private static final String USER_SCHEMA = "schemas/user-schema.json";
@@ -37,5 +37,31 @@ class UsersGetTest extends BaseTest {
                 .body("company.name", instanceOf(String.class))
                 .body("company.catchPhrase", instanceOf(String.class))
                 .body(matchesJsonSchemaInClasspath(USER_SCHEMA));
+    }
+
+    @Test
+    @Story("Get a non-existent user")
+    @Description("GET /users/99999 returns 404 for an id that does not exist")
+    void getUserById_invalidId_returns404() {
+        given().spec(requestSpec)
+                .when().get("/users/{id}", 99999)
+                .then().spec(responseSpec)
+                .statusCode(404)
+                .header("Content-Type", containsString("application/json"));
+    }
+
+    @Test
+    @Story("Filter users by username")
+    @Description("GET /users?username={name} returns 200 with only the matching user")
+    void getUsersFilteredByUsername_returnsOnlyMatchingUser() {
+        given().spec(requestSpec)
+                .queryParam("username", "Bret")
+                .when().get("/users")
+                .then().spec(responseSpec)
+                .statusCode(200)
+                .header("Content-Type", containsString("application/json"))
+                .body("size()", equalTo(1))
+                .body("[0].username", equalTo("Bret"))
+                .body("[0].id", equalTo(1));
     }
 }
