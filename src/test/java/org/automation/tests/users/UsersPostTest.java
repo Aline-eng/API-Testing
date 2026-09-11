@@ -1,10 +1,12 @@
 package org.automation.tests.users;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -16,15 +18,13 @@ import static org.hamcrest.Matchers.*;
 @Feature("Users - POST")
 class UsersPostTest extends BaseTest {
 
+    private static final JsonNode DATA = TestData.load("users.json");
+
     @Test
     @Story("Create a user")
     @Description("POST /users returns 201, echoes the submitted fields, and assigns a generated id")
     void createUser_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newUser = Map.of(
-                "name", "Foo Bar",
-                "username", "foobar",
-                "email", "foo@bar.com"
-        );
+        Map<String, Object> newUser = TestData.asMap(DATA.get("create"));
 
         given().spec(requestSpec)
                 .body(newUser)
