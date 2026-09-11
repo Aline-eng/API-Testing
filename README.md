@@ -15,7 +15,7 @@ after every push to `main`)
 - Java 21, Maven
 - REST Assured 5.x + JSON Schema Validator
 - JUnit 5 (Jupiter), Hamcrest
-- Jackson Databind (POJO mapping)
+- Jackson Databind (JSON test-data fixtures, schema-validation serialization)
 - Allure (JUnit5 + REST Assured integration) for reporting
 - Docker
 - GitHub Actions
@@ -24,22 +24,31 @@ after every push to `main`)
 
 ```
 src/test/java/org/automation/
-  base/              shared test configuration (base URI, request spec)
+  base/              shared test configuration:
+                       BaseTest    - base URI + request/response spec
+                       TestData    - loads JSON fixtures from testdata/
   tests/posts/       full CRUD tests for /posts
   tests/comments/    full CRUD tests for /comments
   tests/albums/      full CRUD tests for /albums
   tests/photos/      full CRUD tests for /photos
   tests/todos/       full CRUD tests for /todos
   tests/users/       full CRUD tests for /users
-src/test/resources/schemas/   JSON schema files used for response validation
+src/test/resources/
+  config.properties            base.uri - the one thing that varies by environment
+  schemas/                     JSON schema files used for response validation
+  testdata/                    one JSON fixture file per resource (request payloads)
 docs/                          test summary / reporting docs
 .github/workflows/             CI/CD pipeline
 Dockerfile
 ```
 
 Assertions are made directly against the response (REST Assured's `jsonPath()` +
-Hamcrest matchers) rather than through POJOs — Jackson is still used to serialize
-extracted response fragments for per-item JSON schema validation.
+Hamcrest matchers) rather than through POJOs. Endpoint paths (e.g. `/posts/{id}`)
+stay inline in each test — they're part of what the test verifies, not
+configuration; only the base URI (`config.properties`) and request-body test data
+(`testdata/*.json`, via the `TestData` loader) are externalized. One exception:
+`PostsEdgeCasesTest`'s deliberately-malformed JSON string can't live in a `.json`
+data file since it isn't valid JSON, so it stays as a literal in the test.
 
 ## Important constraint
 
