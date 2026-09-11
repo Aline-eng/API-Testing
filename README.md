@@ -2,9 +2,10 @@
 
 Automated CRUD test suite for the [JSONPlaceholder](https://jsonplaceholder.typicode.com)
 REST API, built as a lab project for a QA Specialization training module (API Testing
-with REST Assured). Covers full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on
-`/posts`, `/comments`, and `/users`, JSON schema validation, Allure reporting, Docker
-containerization, and a GitHub Actions CI/CD pipeline.
+with REST Assured). Covers full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on all six
+JSONPlaceholder resources — `/posts`, `/comments`, `/albums`, `/photos`, `/todos`,
+`/users` — including query-parameter filtering, JSON schema validation, Allure
+reporting, Docker containerization, and a GitHub Actions CI/CD pipeline.
 
 **Live Allure report:** https://aline-eng.github.io/API-Testing/ (republished by CI
 after every push to `main`)
@@ -26,6 +27,9 @@ src/test/java/org/automation/
   base/              shared test configuration (base URI, request spec)
   tests/posts/       full CRUD tests for /posts
   tests/comments/    full CRUD tests for /comments
+  tests/albums/      full CRUD tests for /albums
+  tests/photos/      full CRUD tests for /photos
+  tests/todos/       full CRUD tests for /todos
   tests/users/       full CRUD tests for /users
 src/test/resources/schemas/   JSON schema files used for response validation
 docs/                          test summary / reporting docs
@@ -81,6 +85,6 @@ bytecode.
 
 - [docs/test-plan.md](docs/test-plan.md) — scope, approach, environment, and the
   full test case matrix (planning-level document)
-- [docs/test-summary.md](docs/test-summary.md) — execution results (20/20 passing)
+- [docs/test-summary.md](docs/test-summary.md) — execution results (51/51 passing)
   and documented API behavior findings (write-simulation, malformed-body status
   codes, etc.)

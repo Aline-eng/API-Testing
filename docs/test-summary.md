@@ -1,38 +1,61 @@
 # Test Summary
 
 Automated REST Assured test suite against the [JSONPlaceholder](https://jsonplaceholder.typicode.com)
-API, covering full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on all three resources:
-`/posts`, `/comments`, and `/users`. Tests are organized one package per resource
-(`org.automation.tests.posts`, `.comments`, `.users`).
+API, covering full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on all six
+JSONPlaceholder resources: `/posts`, `/comments`, `/albums`, `/photos`, `/todos`, and
+`/users`. Tests are organized one package per resource
+(`org.automation.tests.posts`, `.comments`, `.albums`, `.photos`, `.todos`, `.users`).
 
 ## Results
 
-20 / 20 tests passing (verified locally with `mvn clean test`, inside the Docker
+51 / 51 tests passing (verified locally with `mvn clean test`, inside the Docker
 container, and in GitHub Actions CI).
 
 | Test class | Tests | What it covers |
 |---|---|---|
-| `posts.PostsGetTest` | 3 | `GET /posts` (200, 100 items, schema-valid, < 2s), `GET /posts/{id}` (200, id/userId match, schema valid), `GET /posts/99999` (404) |
+| `posts.PostsGetTest` | 4 | List all (200, 100 items, schema-valid, < 2s), single by id, 404, filter by `userId` |
 | `posts.PostsPostTest` | 1 | `POST /posts` (201, echoes submitted fields, generated id present) |
-| `posts.PostsPutPatchTest` | 2 | `PUT /posts/{id}` (200, full replace), `PATCH /posts/{id}` (200, only targeted field changes) |
+| `posts.PostsPutPatchTest` | 2 | `PUT`/`PATCH /posts/{id}` (full replace / partial update) |
 | `posts.PostsDeleteTest` | 1 | `DELETE /posts/{id}` (200, empty body) |
 | `posts.PostsEdgeCasesTest` | 3 | Malformed/edge-case POST bodies (see findings below) |
-| `comments.CommentsGetTest` | 1 | `GET /posts/{id}/comments` (200, non-empty, every `postId` matches, schema valid) |
+| `comments.CommentsGetTest` | 4 | Nested list (`/posts/{id}/comments`), filter by `postId` (query param), single by id, 404 |
 | `comments.CommentsPostTest` | 1 | `POST /comments` (201, echoes submitted fields, generated id present) |
-| `comments.CommentsPutPatchTest` | 2 | `PUT /comments/{id}` (200, full replace), `PATCH /comments/{id}` (200, only targeted field changes) |
+| `comments.CommentsPutPatchTest` | 2 | `PUT`/`PATCH /comments/{id}` (full replace / partial update) |
 | `comments.CommentsDeleteTest` | 1 | `DELETE /comments/{id}` (200, empty body) |
-| `users.UsersGetTest` | 1 | `GET /users/{id}` (200, nested `address`/`company` present and correctly typed, schema valid) |
+| `albums.AlbumsGetTest` | 4 | List all (200, 100 items, schema-valid), single by id, 404, filter by `userId` |
+| `albums.AlbumsPostTest` | 1 | `POST /albums` (201, echoes submitted fields, generated id present) |
+| `albums.AlbumsPutPatchTest` | 2 | `PUT`/`PATCH /albums/{id}` (full replace / partial update) |
+| `albums.AlbumsDeleteTest` | 1 | `DELETE /albums/{id}` (200, empty body) |
+| `photos.PhotosGetTest` | 4 | List all (200, 5000 items, 25-item schema sample), single by id, 404, filter by `albumId` |
+| `photos.PhotosPostTest` | 1 | `POST /photos` (201, echoes submitted fields, generated id present) |
+| `photos.PhotosPutPatchTest` | 2 | `PUT`/`PATCH /photos/{id}` (full replace / partial update) |
+| `photos.PhotosDeleteTest` | 1 | `DELETE /photos/{id}` (200, empty body) |
+| `todos.TodosGetTest` | 5 | List all (200, 200 items, schema-valid), single by id, 404, filter by `userId`, filter by `completed` |
+| `todos.TodosPostTest` | 1 | `POST /todos` (201, echoes submitted fields, generated id present) |
+| `todos.TodosPutPatchTest` | 2 | `PUT`/`PATCH /todos/{id}` (full replace / partial update) |
+| `todos.TodosDeleteTest` | 1 | `DELETE /todos/{id}` (200, empty body) |
+| `users.UsersGetTest` | 3 | Single by id (nested `address`/`company`), 404, filter by `username` |
 | `users.UsersPostTest` | 1 | `POST /users` (201, echoes submitted fields, generated id present) |
-| `users.UsersPutPatchTest` | 2 | `PUT /users/{id}` (200, full replace), `PATCH /users/{id}` (200, only targeted field changes, nested `address`/`company` unaffected) |
+| `users.UsersPutPatchTest` | 2 | `PUT`/`PATCH /users/{id}` (full replace / partial update, nested objects unaffected by PATCH) |
 | `users.UsersDeleteTest` | 1 | `DELETE /users/{id}` (200, empty body) |
 
 Every test asserts a status code, at least one header, and relevant body fields; GET
 tests additionally validate the response against a JSON schema
-(`src/test/resources/schemas/`).
+(`src/test/resources/schemas/`), and every resource's GET coverage includes a
+list-all, a single-by-id, a 404-for-invalid-id, and at least one query-parameter
+filter test.
 
-**Note:** the original lab spec labeled Comments and Users as "read-only" (`GET`
-only); CRUD was expanded to all three resources per a later scope decision, since
-JSONPlaceholder simulates writes identically across every resource.
+**Notes on scope decisions:**
+- The original lab spec labeled Comments and Users as "read-only" (`GET` only) and
+  didn't mention Albums/Photos/Todos at all; CRUD was expanded to all six resources
+  per later scope decisions, since JSONPlaceholder simulates writes identically
+  across every resource.
+- Security/penetration testing was explicitly considered and left out of scope —
+  JSONPlaceholder has no real backend, so classic exploits (injection, auth bypass)
+  don't apply. Two real, non-exploit findings surfaced anyway and are documented
+  below: the malformed-JSON 500 response leaks an internal stack trace, and no
+  endpoint enforces authentication (expected for a public demo API, but worth
+  stating explicitly rather than leaving implicit).
 
 ## Known constraints and findings
 
@@ -69,7 +92,7 @@ bytecode. Both were changed to JDK 21 to match the pom.
 
 See the [README](../README.md) for local, Docker, and CI instructions.
 
-- `mvn clean test` — run all 20 tests
+- `mvn clean test` — run all 51 tests
 - `mvn allure:report && mvn allure:serve` — generate and view the Allure report
   (request/response attached per test via the `allure-rest-assured` filter)
 - `docker build -t api-testing-lab . && docker run --rm api-testing-lab` — run the
