@@ -1,10 +1,12 @@
 package org.automation.tests.photos;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -17,18 +19,13 @@ import static org.hamcrest.Matchers.equalTo;
 class PhotosPutPatchTest extends BaseTest {
 
     private static final int PHOTO_ID = 1;
+    private static final JsonNode DATA = TestData.load("photos.json");
 
     @Test
     @Story("Full update of a photo")
     @Description("PUT /photos/{id} returns 200 with the full resource replaced by the submitted fields")
     void updatePhoto_replacesFullResource() {
-        Map<String, Object> updatedPhoto = Map.of(
-                "id", PHOTO_ID,
-                "albumId", 1,
-                "title", "updated title",
-                "url", "https://via.placeholder.com/600/111111",
-                "thumbnailUrl", "https://via.placeholder.com/150/111111"
-        );
+        Map<String, Object> updatedPhoto = TestData.asMap(DATA.get("update"));
 
         given().spec(requestSpec)
                 .body(updatedPhoto)
@@ -47,7 +44,7 @@ class PhotosPutPatchTest extends BaseTest {
     @Story("Partial update of a photo")
     @Description("PATCH /photos/{id} returns 200, changes only the targeted field, leaves the rest unchanged")
     void patchPhoto_changesOnlyTargetedField() {
-        String newTitle = "patched title";
+        String newTitle = DATA.get("patchTitle").asText();
 
         given().spec(requestSpec)
                 .body(Map.of("title", newTitle))
@@ -58,7 +55,7 @@ class PhotosPutPatchTest extends BaseTest {
                 .body("id", equalTo(PHOTO_ID))
                 .body("albumId", equalTo(1))
                 .body("title", equalTo(newTitle))
-                .body("url", equalTo("https://via.placeholder.com/600/92c952"))
-                .body("thumbnailUrl", equalTo("https://via.placeholder.com/150/92c952"));
+                .body("url", equalTo(DATA.get("originalUrl").asText()))
+                .body("thumbnailUrl", equalTo(DATA.get("originalThumbnailUrl").asText()));
     }
 }

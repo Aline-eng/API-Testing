@@ -1,10 +1,12 @@
 package org.automation.tests.todos;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -16,15 +18,13 @@ import static org.hamcrest.Matchers.*;
 @Feature("Todos - POST")
 class TodosPostTest extends BaseTest {
 
+    private static final JsonNode DATA = TestData.load("todos.json");
+
     @Test
     @Story("Create a todo")
     @Description("POST /todos returns 201, echoes the submitted fields, and assigns a generated id")
     void createTodo_echoesSubmittedFieldsAndAssignsId() {
-        Map<String, Object> newTodo = Map.of(
-                "userId", 1,
-                "title", "foo",
-                "completed", false
-        );
+        Map<String, Object> newTodo = TestData.asMap(DATA.get("create"));
 
         given().spec(requestSpec)
                 .body(newTodo)

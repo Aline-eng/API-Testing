@@ -1,10 +1,12 @@
 package org.automation.tests.todos;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.automation.base.BaseTest;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -17,17 +19,13 @@ import static org.hamcrest.Matchers.equalTo;
 class TodosPutPatchTest extends BaseTest {
 
     private static final int TODO_ID = 1;
+    private static final JsonNode DATA = TestData.load("todos.json");
 
     @Test
     @Story("Full update of a todo")
     @Description("PUT /todos/{id} returns 200 with the full resource replaced by the submitted fields")
     void updateTodo_replacesFullResource() {
-        Map<String, Object> updatedTodo = Map.of(
-                "id", TODO_ID,
-                "userId", 1,
-                "title", "updated title",
-                "completed", true
-        );
+        Map<String, Object> updatedTodo = TestData.asMap(DATA.get("update"));
 
         given().spec(requestSpec)
                 .body(updatedTodo)
@@ -53,7 +51,7 @@ class TodosPutPatchTest extends BaseTest {
                 .header("Content-Type", equalTo("application/json; charset=utf-8"))
                 .body("id", equalTo(TODO_ID))
                 .body("userId", equalTo(1))
-                .body("title", equalTo("delectus aut autem"))
+                .body("title", equalTo(DATA.get("originalTitle").asText()))
                 .body("completed", equalTo(true));
     }
 }
