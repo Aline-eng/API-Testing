@@ -6,6 +6,9 @@ with REST Assured). Covers full CRUD (`GET`/`POST`/`PUT`/`PATCH`/`DELETE`) on
 `/posts`, `/comments`, and `/users`, JSON schema validation, Allure reporting, Docker
 containerization, and a GitHub Actions CI/CD pipeline.
 
+**Live Allure report:** https://aline-eng.github.io/API-Testing/ (republished by CI
+after every push to `main`)
+
 ## Tech stack
 
 - Java 21, Maven
@@ -65,7 +68,9 @@ docker run --rm api-testing-lab
 ```
 
 CI runs the full suite and publishes the Allure report as a build artifact on every
-push and pull request — see `.github/workflows/api-tests.yml`.
+push and pull request; on a successful push to `main`, it's also deployed to GitHub
+Pages at https://aline-eng.github.io/API-Testing/ — see
+`.github/workflows/api-tests.yml`.
 
 **Note:** the Dockerfile and CI workflow use JDK 21 (`maven:3.9-eclipse-temurin-21`,
 `java-version: '21'`) to match `pom.xml`'s Java 21 target, rather than the JDK 17
