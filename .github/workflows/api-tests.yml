@@ -27,6 +27,13 @@ jobs:
           docker cp test-run:/app/target ./target
           docker rm test-run
           exit $STATUS
+      - name: Fetch previous Allure history (for trend graphs)
+        if: always()
+        run: |
+          mkdir -p target/allure-results/history
+          for f in history.json history-trend.json categories-trend.json duration-trend.json retry-trend.json; do
+            curl -sf "https://aline-eng.github.io/API-Testing/history/$f" -o "target/allure-results/history/$f" || rm -f "target/allure-results/history/$f"
+          done
       - name: Generate Allure report
         if: always()
         run: mvn allure:report
