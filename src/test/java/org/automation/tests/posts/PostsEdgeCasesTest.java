@@ -1,14 +1,16 @@
 package org.automation.tests.posts;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.restassured.response.Response;
 import org.automation.base.BaseTest;
+import org.automation.base.Endpoints;
+import org.automation.base.TestData;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -28,16 +30,20 @@ import static org.hamcrest.Matchers.equalTo;
 @Feature("Posts - Edge cases")
 class PostsEdgeCasesTest extends BaseTest {
 
+    private static final JsonNode DATA = TestData.load("posts.json");
+
     @Test
     @Story("Malformed request body")
     @Description("POST /posts with syntactically invalid JSON returns 500, not 400, " +
             "because JSONPlaceholder's body-parser throws an unhandled JSON.parse error")
     void postWithMalformedJsonSyntax_serverReturns500NotBadRequest() {
+        // Deliberately invalid JSON - can't live in a .json test-data file since it
+        // wouldn't parse as JSON at all, so this one stays as a literal here.
         String malformedJson = "{\"title\": \"foo\", \"body\": \"bar\", ";
 
         Response response = given().spec(requestSpec)
                 .body(malformedJson)
-                .when().post("/posts")
+                .when().post(Endpoints.get("posts"))
                 .then().extract().response();
 
         System.out.println("Raw response status: " + response.getStatusCode());
@@ -53,7 +59,7 @@ class PostsEdgeCasesTest extends BaseTest {
     void postWithEmptyBody_serverAcceptsWithNoValidation() {
         Response response = given().spec(requestSpec)
                 .body("{}")
-                .when().post("/posts")
+                .when().post(Endpoints.get("posts"))
                 .then().extract().response();
 
         System.out.println("Raw response status: " + response.getStatusCode());
@@ -67,14 +73,11 @@ class PostsEdgeCasesTest extends BaseTest {
     @Description("POST /posts with userId sent as a string still returns 201 - JSONPlaceholder " +
             "performs no server-side type validation")
     void postWithWrongFieldTypes_serverAcceptsWithNoValidation() {
-        Map<String, Object> malformedTypes = new HashMap<>();
-        malformedTypes.put("title", "foo");
-        malformedTypes.put("body", "bar");
-        malformedTypes.put("userId", "not-a-number");
+        Map<String, Object> malformedTypes = TestData.asMap(DATA.get("wrongFieldTypes"));
 
         Response response = given().spec(requestSpec)
                 .body(malformedTypes)
-                .when().post("/posts")
+                .when().post(Endpoints.get("posts"))
                 .then().extract().response();
 
         System.out.println("Raw response status: " + response.getStatusCode());

@@ -7,6 +7,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.restassured.response.Response;
 import org.automation.base.BaseTest;
+import org.automation.base.Endpoints;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -29,7 +30,7 @@ class PostsGetTest extends BaseTest {
     @Description("GET /posts returns 200, an array of 100 posts, each matching the post schema, within 2s")
     void getAllPosts_returnsAllPostsMatchingSchema() throws Exception {
         Response response = given().spec(requestSpec)
-                .when().get("/posts")
+                .when().get(Endpoints.get("posts"))
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", containsString("application/json"))
@@ -53,7 +54,7 @@ class PostsGetTest extends BaseTest {
         int postId = 1;
 
         given().spec(requestSpec)
-                .when().get("/posts/{id}", postId)
+                .when().get(Endpoints.get("posts.byId"), postId)
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", containsString("application/json"))
@@ -67,7 +68,7 @@ class PostsGetTest extends BaseTest {
     @Description("GET /posts/99999 returns 404 for an id that does not exist")
     void getPostById_invalidId_returns404() {
         given().spec(requestSpec)
-                .when().get("/posts/{id}", 99999)
+                .when().get(Endpoints.get("posts.byId"), 99999)
                 .then().spec(responseSpec)
                 .statusCode(404)
                 .header("Content-Type", containsString("application/json"));
@@ -81,7 +82,7 @@ class PostsGetTest extends BaseTest {
 
         given().spec(requestSpec)
                 .queryParam("userId", userId)
-                .when().get("/posts")
+                .when().get(Endpoints.get("posts"))
                 .then().spec(responseSpec)
                 .statusCode(200)
                 .header("Content-Type", containsString("application/json"))

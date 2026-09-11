@@ -1,0 +1,7 @@
+{
+  "create": { "title": "foo", "body": "bar", "userId": 1 },
+  "update": { "id": 1, "title": "updated title", "body": "updated body", "userId": 1 },
+  "patchTitle": "patched title",
+  "originalBody": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+  "wrongFieldTypes": { "title": "foo", "body": "bar", "userId": "not-a-number" }
+}
